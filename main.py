@@ -12,8 +12,8 @@ def parse_auto(brand: str, limit: int):
     images = list()
     print('Parsing for', brand, "started")
     try:
-        for page in range(1, page_limit+1):
-            page = urlopen('https://www.avito.ru/rossiya/avtomobili/' + brand + '?user=1&i=1&p='+str(page))
+        for page in range(1, limit + 1):
+            page = urlopen('https://www.avito.ru/rossiya/avtomobili/' + brand + '?user=1&i=1&p=' + str(page))
             soup = bs4.BeautifulSoup(page, features="html.parser")
             image_div_list = soup.find_all('div', 'item-slider-image large-picture')
             print('Found', len(image_div_list), 'new div with', brand)
@@ -38,22 +38,28 @@ def parse_auto(brand: str, limit: int):
             out = open(path + '\\data\\' + brand + '\\' + str(name_iterator) + '.jpg', 'wb')
             out.write(img)
             out.close()
-            print('/data/'+brand+"/"+str(name_iterator)+'.jpg was saved successfully')
+            print('/data/' + brand + "/" + str(name_iterator) + '.jpg was saved successfully')
             name_iterator += 1
         except:
-            print('Unexpected error while saving file /data/'+brand+"/"+str(name_iterator)+'.jpg')
+            print('Unexpected error while saving file /data/' + brand + "/" + str(name_iterator) + '.jpg')
             name_iterator += 1
 
 
-# for car in brands:
-#     parse_auto(car, page_limit)
+def one_threads_parse(_brands, _limit):
+    for car in brands:
+        parse_auto(car, page_limit)
 
-threads = dict()
-for car in brands:
-    threads[car] = Thread(target=parse_auto, args=(car, page_limit))
 
-for thread in threads.keys():
-    threads[thread].start()
+def three_threads_parse(_brands, _limit):
+    threads = dict()
+    for car in brands:
+        threads[car] = Thread(target=parse_auto, args=(car, page_limit))
 
-for thread in threads.keys():
-    threads[thread].join()
+    for thread in threads.keys():
+        threads[thread].start()
+
+    for thread in threads.keys():
+        threads[thread].join()
+
+
+one_threads_parse(brands, page_limit)
